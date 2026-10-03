@@ -12,7 +12,7 @@
     </header>
 
     <div class="stat-row">
-      <article v-for="item in stats" :key="item.label" class="stat-card">
+      <article v-for="item in statCards" :key="item.label" class="stat-card">
         <span class="stat-label">{{ item.label }}</span>
         <strong class="stat-value">{{ item.value }}</strong>
       </article>
@@ -71,7 +71,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 
 import {
   downloadEntries,
@@ -79,13 +79,14 @@ import {
   moduleMeta,
   runAction as applyAction,
 } from '@/api/local-service'
+import { ENTRIES_UPDATED_EVENT } from '@/data/local-store'
 import type { EntryRow } from '@/data/types'
 
 const meta = moduleMeta('compilation')
 const columns = ["成果编号", "整编年份", "站点编号", "整编类型", "原始记录数", "整编人", "审核人", "整编状态"]
-const actions = ["开始整编", "提交审核", "驳回整编"]
-const statuses = ["待整编", "整编中", "待审核", "已刊印", "已驳回"]
-const stats = [{"label": "待整编年度", "value": 0}, {"label": "整编中年度", "value": 0}, {"label": "已刊印成果", "value": 0}]
+const actions = ["开始整编", "提交审核", "核对通过", "核对退回", "驳回整编"]
+const statuses = ["待整编", "整编中", "待审核", "待核对", "已刊印", "已驳回"]
+const stats = [{"label": "待整编年度", "value": 0}, {"label": "整编中年度", "value": 0}, {"label": "待核对成果", "value": 0}, {"label": "已刊印成果", "value": 0}]
 
 const rows = ref<EntryRow[]>([])
 const total = ref(0)
@@ -97,6 +98,14 @@ const statusSummary = computed(() =>
     status,
     count: rows.value.filter((row) => String(row.status) === status).length,
   })),
+)
+
+const statCards = computed(() =>
+  stats.map((item) =>
+    item.label === '待核对成果'
+      ? { ...item, value: rows.value.filter((row) => String(row.status) === '待核对').length }
+      : item,
+  ),
 )
 
 function resetFilters() {
@@ -134,4 +143,20 @@ function reload() {
 }
 
 onMounted(reload)
+
+// 别的终端在资料交换台确认批次后，整编清单即时多出待核对成果。
+function onStorage(event: StorageEvent) {
+  if (event.key && event.key.includes('entries')) {
+    reload()
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('storage', onStorage)
+  window.addEventListener(ENTRIES_UPDATED_EVENT, reload)
+})
+onUnmounted(() => {
+  window.removeEventListener('storage', onStorage)
+  window.removeEventListener(ENTRIES_UPDATED_EVENT, reload)
+})
 </script>

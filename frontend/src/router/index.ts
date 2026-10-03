@@ -5,6 +5,7 @@ const Station = () => import('@/views/station/index.vue')
 const Waterlevel = () => import('@/views/waterlevel/index.vue')
 const Discharge = () => import('@/views/discharge/index.vue')
 const Rainfall = () => import('@/views/rainfall/index.vue')
+const RainfallExchange = () => import('@/views/rainfall/exchange.vue')
 const Waterquality = () => import('@/views/waterquality/index.vue')
 const Crosssection = () => import('@/views/crosssection/index.vue')
 const Telemetry = () => import('@/views/telemetry/index.vue')
@@ -28,6 +29,7 @@ const router = createRouter({
     { path: '/waterlevel', name: 'waterlevel', component: Waterlevel },
     { path: '/discharge', name: 'discharge', component: Discharge },
     { path: '/rainfall', name: 'rainfall', component: Rainfall },
+    { path: '/rainfall/exchange', name: 'rainfall-exchange', component: RainfallExchange },
     { path: '/waterquality', name: 'waterquality', component: Waterquality },
     { path: '/crosssection', name: 'crosssection', component: Crosssection },
     { path: '/telemetry', name: 'telemetry', component: Telemetry },

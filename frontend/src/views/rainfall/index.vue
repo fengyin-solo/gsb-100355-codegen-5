@@ -7,6 +7,7 @@
       </div>
       <div class="page-actions">
         <button class="btn primary" type="button" @click="openCreate">登记雨量记录</button>
+        <RouterLink class="btn" to="/rainfall/exchange">资料交换台</RouterLink>
         <button class="btn" type="button" @click="exportRows">导出雨量观测清单</button>
       </div>
     </header>
@@ -71,7 +72,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 
 import {
   downloadEntries,
@@ -79,10 +80,11 @@ import {
   moduleMeta,
   runAction as applyAction,
 } from '@/api/local-service'
+import { ENTRIES_UPDATED_EVENT } from '@/data/local-store'
 import type { EntryRow } from '@/data/types'
 
 const meta = moduleMeta('rainfall')
-const columns = ["记录编号", "站点编号", "观测时段", "时段雨量", "日累计雨量", "降雨强度", "观测人", "记录状态"]
+const columns = ["记录编号", "站点编号", "观测时段", "时段雨量", "日累计雨量", "降雨强度", "观测人", "数据来源", "记录状态"]
 const actions = ["提交审核", "确认通过", "标记异常"]
 const statuses = ["已采集", "待审核", "已通过", "异常值"]
 const stats = [{"label": "今日观测站次", "value": 0}, {"label": "暴雨站点数", "value": 0}, {"label": "待审核记录", "value": 0}]
@@ -134,4 +136,8 @@ function reload() {
 }
 
 onMounted(reload)
+
+// 资料交换台回填时段雨量后，本页即时看到新增/更新记录。
+onMounted(() => window.addEventListener(ENTRIES_UPDATED_EVENT, reload))
+onUnmounted(() => window.removeEventListener(ENTRIES_UPDATED_EVENT, reload))
 </script>
