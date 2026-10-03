@@ -67,12 +67,15 @@
       <span>共 {{ total }} 条水位监测记录</span>
       <span v-if="errorMessage" class="error-text">{{ errorMessage }}</span>
     </footer>
+
+    <WaterlevelChecklist />
   </section>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 
+import WaterlevelChecklist from '@/components/WaterlevelChecklist.vue'
 import {
   downloadEntries,
   listEntries,

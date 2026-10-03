@@ -48,6 +48,20 @@ export function saveRows(key: string, rows: EntryRow[]): void {
   }
 }
 
+/** 合并多个模块的最新数据：交换台回填雨量台账时只写 rainfall，不覆盖别模块的并发改动。 */
+export function mergeRows(patch: Record<string, EntryRow[]>): void {
+  const next = { ...allRows(), ...patch }
+  cache = next
+  if (typeof window !== 'undefined' && window.localStorage) {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+  }
+}
+
+/** 别的终端（浏览器标签页）写了 localStorage 后，本终端丢弃内存缓存，下次读取拿最新值。 */
+export function invalidateCache(): void {
+  cache = null
+}
+
 export function resetRows(key: string): EntryRow[] {
   const rows = clone(SEED_ROWS[key] ?? [])
   saveRows(key, rows)
